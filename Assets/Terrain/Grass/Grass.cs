@@ -42,7 +42,7 @@ namespace Terrain
 
 			if (packedMaterial != null)
 			{
-				packedMaterial.SetFloat("_CurrentTime", (float)frameUpdate);
+				packedMaterial.SetFloat("_FrameUpdate", (float)frameUpdate);
 			}
 
 			for (int i = 0; i < chunkList.Count; i++)
@@ -237,14 +237,14 @@ namespace Terrain
 							colors[vertIndex + 2] = useColors[texIndex];
 							colors[vertIndex + 3] = useColors[texIndex];
 
-							uv3[vertIndex + 0].x = 1f;
-							uv3[vertIndex + 0].y = (float)state;
-							uv3[vertIndex + 1].x = 1f;
-							uv3[vertIndex + 1].y = (float)state;
-							uv3[vertIndex + 2].x = 1f;
-							uv3[vertIndex + 2].y = (float)state;
-							uv3[vertIndex + 3].x = 1f;
-							uv3[vertIndex + 3].y = (float)state;
+							uv3[vertIndex + 0].x = 0.5f;
+							uv3[vertIndex + 0].y = (float)state/100000f;
+							uv3[vertIndex + 1].x = 0.5f;
+							uv3[vertIndex + 1].y = (float)state/100000f;
+							uv3[vertIndex + 2].x = 0f;
+							uv3[vertIndex + 2].y = (float)state/100000f;
+							uv3[vertIndex + 3].x = 0f;
+							uv3[vertIndex + 3].y = (float)state/100000f;
 								
 							normals[vertIndex + 0].x = 0f;
 							normals[vertIndex + 0].y = 1f;
@@ -367,11 +367,11 @@ namespace Terrain
 			return 0;
 		}
 
-		private void Disturb(Vector3 pos, float strength)
+		public void Disturb(Vector3 pos, float radius, float strength)
 		{
 			for (int i = 0; i < chunkList.Count; i++)
 			{
-				chunkList[i].Disturb(pos, strength);
+				chunkList[i].Disturb(pos, radius, strength);
 			}
 		}
 	}
