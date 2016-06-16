@@ -24,18 +24,19 @@ Shader "Terrain/Grass"
 
 		sampler2D _MainTex;
 		fixed _Cutoff;
+		half _WaveSpeed;
+		half _WaveScale;
 		half _FrameUpdate;
 	
 		void GrassVert (inout appdata_full v)
 		{
-			float2 disturb = v.texcoord2;
-			
-			float s = sin(_FrameUpdate*disturb.y);
-			float c = cos(_FrameUpdate*disturb.y);
-			
-			float3 waveMove = float3(s*disturb.x,0,c*disturb.x);
-			
-			v.vertex.xz -= waveMove.xz;
+			half2 disturb = v.texcoord2;
+			disturb.y += _FrameUpdate;
+			disturb.y *= 0.025f;
+			half s = sin(disturb.y);
+			half c = cos(disturb.y);
+			half3 waveMove = float3(s, 0, c) * disturb.x * 0.08f;
+			v.vertex.xz += waveMove.xz;
 		}
 					
 		struct Input

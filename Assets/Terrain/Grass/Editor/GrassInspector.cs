@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Collections;
 
@@ -18,7 +18,7 @@ public class GrassInspector : Editor
 				for (int i = 0; i < Terrain.TerrainConst.GRASS_CHUNK_CELL_COUNT; i++)
 				{
 					data.size[i] = 2;
-					data.info[i] = (byte)(i > 32*16 ? 1: 2);
+					data.texPos[i] = (byte)(i > 32*16 ? 1: 2);
 				}
 			}
 		}

@@ -11,13 +11,19 @@ namespace Terrain
 		public int posZ;
 		public int seed;
 		public ushort[] size = new ushort[TerrainConst.GRASS_CHUNK_CELL_COUNT];
-		public byte[] info = new byte[TerrainConst.GRASS_CHUNK_CELL_COUNT]; // density(8) | texPos(8)
+		public byte[] texPos = new byte[TerrainConst.GRASS_CHUNK_CELL_COUNT];
 		public int[] textureIndeics;
 	}
 
 	public class GrassChunkCell
 	{
-
+		public int vertStart;
+		public int waveSpeedStart;
+		public float waveSpeed;
+		public float waveSpeedStep;
+		public float strength;
+		public float strengthFactor;
+		public bool isDisturb;
 	}
 
 	public class GrassChunk : MonoBehaviour 
@@ -33,6 +39,12 @@ namespace Terrain
 		
 		[HideInInspector]
 		public Vector2[] uv3;
+
+		[HideInInspector]
+		public List<GrassChunkCell> cellList;
+
+		[HideInInspector]
+		public GrassChunkCell[,] cellMap;
 
 		private bool isDirty = false;
 		private bool isVisible;
@@ -63,7 +75,38 @@ namespace Terrain
 			{
 				bool updateMesh = false;
 
-				//
+				for (int i = 0; i < cellList.Count; i++)
+				{
+					GrassChunkCell cell = cellList[i];
+
+					if (cell.isDisturb || cell.strength > 1)
+					{
+						updateMesh = true;
+
+						float n = (!cell.isDisturb) ? cell.strength : cell.strength * cell.strengthFactor;
+						cell.waveSpeed += cell.waveSpeedStep * ((n - 1) * 4 / 7 + 1);
+
+						uv3[cell.vertStart + 0].x = n;
+						uv3[cell.vertStart + 0].y = cell.waveSpeed - ((float)cell.waveSpeedStart + cell.waveSpeedStep * (float)updateFrame);
+						uv3[cell.vertStart + 1].x = uv3[cell.vertStart + 0].x;
+						uv3[cell.vertStart + 1].y = uv3[cell.vertStart + 0].y;
+
+						if (cell.isDisturb)
+						{
+							cell.strengthFactor += 0.15f;
+							if (cell.strengthFactor > 1)
+							{
+								cell.strengthFactor = 1;
+								cell.isDisturb = false;
+							}
+						}
+						else
+						{
+							cell.strength = n > 1 ? n * 0.95f : 1;
+							cell.strengthFactor *= 0.95f;
+						}
+					}
+				}
 
 				if (updateMesh)
 				{
@@ -93,80 +136,87 @@ namespace Terrain
 			float z2 = posz + radius;
 
 			// out of bounds
-			if (x1 > TerrainConst.TERRAIN_CHUNK_SIZE || x2 < 0f || 
-				z1 > TerrainConst.TERRAIN_CHUNK_SIZE || z2 < 0f) 
+			if (x1 > TerrainConst.TERRAIN_CHUNK_SIZE || x2 < 0f || z1 > TerrainConst.TERRAIN_CHUNK_SIZE || z2 < 0f) 
 			{
 				return;
 			}
 
-			int cx1 = Mathf.Clamp(Mathf.CeilToInt(x1 / TerrainConst.GRASS_CHUNK_CELL_SIZE), 0, TerrainConst.GRASS_CHUNK_CELL_DIM - 1);
+			int cx1 = Mathf.Clamp(Mathf.FloorToInt(x1 / TerrainConst.GRASS_CHUNK_CELL_SIZE), 0, TerrainConst.GRASS_CHUNK_CELL_DIM - 1);
 			int cx2 = Mathf.Clamp(Mathf.FloorToInt(x2 / TerrainConst.GRASS_CHUNK_CELL_SIZE), 0, TerrainConst.GRASS_CHUNK_CELL_DIM - 1);
-			int cz1 = Mathf.Clamp(Mathf.CeilToInt(z1 / TerrainConst.GRASS_CHUNK_CELL_SIZE), 0, TerrainConst.GRASS_CHUNK_CELL_DIM - 1);
+			int cz1 = Mathf.Clamp(Mathf.FloorToInt(z1 / TerrainConst.GRASS_CHUNK_CELL_SIZE), 0, TerrainConst.GRASS_CHUNK_CELL_DIM - 1);
 			int cz2 = Mathf.Clamp(Mathf.FloorToInt(z2 / TerrainConst.GRASS_CHUNK_CELL_SIZE), 0, TerrainConst.GRASS_CHUNK_CELL_DIM - 1);
 
-			Debug.Log (cx1 + " to " + cx2 + ", " + cz1 + " to " + cz2);
+			if (strength < 0)
+				strength = 0;
 
-			if (strength < 0f)
-			{
-				strength = 0f;
-			}
-
-			float disRef = 1.75f;
 			if (strength > 1f)
-			{
-				disRef *= strength;
-			}
-
-			float cx = (float)cx1 * TerrainConst.GRASS_CHUNK_CELL_SIZE;
-			float cz = (float)cz1 * TerrainConst.GRASS_CHUNK_CELL_SIZE;
+				radius *= strength;
 
 			for (int i = cz1; i <= cz2; i++)
 			{
 				for (int j = cx1; j <= cx2; j++)
 				{
-					//CGrassFast.CState cState = this.m_StateTable[i, j];
-					//if (cState != null)
+					GrassChunkCell cell = cellMap[j, i];
+
+					if (cell != null)
 					{
+						float cx = (float)j * TerrainConst.GRASS_CHUNK_CELL_SIZE;
+						float cz = (float)i * TerrainConst.GRASS_CHUNK_CELL_SIZE;
+
 						float dis = Mathf.Sqrt((cx - posx) * (cx - posx) + (cz - posz) * (cz - posz));
-						if (dis < disRef)
+						if (dis < radius)
 						{
-							float num13 = (1f - dis / disRef) * 7f + 1f;
-							num13 *= strength;
-							//if (cState.m_Touch < num13)
+							float f = (1f - dis / radius) * 7f + 1f;
+							f *= strength;
+							if (cell.strength < f)
 							{
-								//cState.m_Touch = num13;
-								float num14 = Mathf.Acos((cx - posx) / dis);
+								cell.strength = f;
+								float ff = Mathf.Acos((cx - posx) / dis);
 								if (cz < posz)
 								{
-									num14 = 2*Mathf.PI- num14;
+									ff = 2 * Mathf.PI - ff;
 								}
-								//cState.m_State = num14 / (2*Mathf.PI) * 256f;
-								//cState.m_TouchBegin = true;
-								//if (cState.m_TouchFactor < 0.1f)
-								//{
-								//		cState.m_TouchFactor = 0.1f;
-								//}
+								cell.waveSpeed = 256 * ff / (2 * Mathf.PI);
+								cell.isDisturb = true;
+								if (cell.strengthFactor < 0.1f)
+								{
+									cell.strengthFactor = 0.1f;
+								}
 								isDirty = true;
 							}
 						}
 					}
-					cx += TerrainConst.GRASS_CHUNK_CELL_SIZE;
 				}
-				cz += TerrainConst.GRASS_CHUNK_CELL_SIZE;
 			}
 		}
 
-		void OnDrawGizmos()
-		{
-			if (isVisible)
-			{
-				Vector3 size = new Vector3(TerrainConst.TERRAIN_CHUNK_SIZE, 5, TerrainConst.TERRAIN_CHUNK_SIZE);
-				Vector3 center = transform.position + size / 2;
-				Gizmos.matrix = transform.localToWorldMatrix;
-				Gizmos.color = (UnityEditor.Selection.activeGameObject == gameObject) ? Color.grey : Color.green;
-				Gizmos.DrawWireCube(center, size);
-				Gizmos.color = Color.clear;
-			}
-		}
+//		void OnDrawGizmos()
+//		{
+//			if (isVisible)
+//			{
+//				Vector3 size = new Vector3(TerrainConst.TERRAIN_CHUNK_SIZE, 2, TerrainConst.TERRAIN_CHUNK_SIZE);
+//				Vector3 center = transform.position + size / 2;
+//				Gizmos.matrix = transform.localToWorldMatrix;
+//				Gizmos.color = (UnityEditor.Selection.activeGameObject == gameObject) ? Color.grey : Color.green;
+//				Gizmos.DrawWireCube(center, size);
+//
+//				Vector3 csize = new Vector3(TerrainConst.GRASS_CHUNK_CELL_SIZE, TerrainConst.GRASS_CHUNK_CELL_SIZE, TerrainConst.GRASS_CHUNK_CELL_SIZE);
+//				for (int i = 0; i < TerrainConst.GRASS_CHUNK_CELL_DIM; i++)
+//				{
+//					for (int j = 0; j < TerrainConst.GRASS_CHUNK_CELL_DIM; j++)
+//					{
+//						GrassChunkCell cell = cellMap[i, j];
+//						
+//						if (cell != null)
+//						{ 
+//							Vector3 ccenter = new Vector3(i * TerrainConst.GRASS_CHUNK_CELL_SIZE, 0, j * TerrainConst.GRASS_CHUNK_CELL_SIZE) + csize / 2;
+//							Gizmos.DrawWireCube(ccenter, csize);
+//						}
+//					}
+//				}
+//
+//				Gizmos.color = Color.clear;
+//			}
+//		}
 	}
 }

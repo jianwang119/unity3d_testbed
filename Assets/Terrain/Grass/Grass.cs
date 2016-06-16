@@ -125,16 +125,22 @@ namespace Terrain
 			}
 
 			int grassCount = 0;
+			int grassCounter = 0;
+			int grassSkip = 2;
 
-			for (int i = 0; i < TerrainConst.GRASS_CHUNK_CELL_DIM; i++)
+			for (int i = 0; i < d.textureIndeics.Length; i++)
 			{
-				for (int j = 0; j < TerrainConst.GRASS_CHUNK_CELL_DIM; j++)
+				for (int l = 0; l < TerrainConst.GRASS_CHUNK_CELL_DIM; l++)
 				{
-					int idx = i * TerrainConst.GRASS_CHUNK_CELL_DIM + j;
-
-					if (d.textureIndeics != null && d.size[idx] > 0 && (d.info[idx] & 0xf) > 0 && (int)(d.info[idx] & 0xf) < d.textureIndeics.Length + 1)
+					for (int m = 0; m < TerrainConst.GRASS_CHUNK_CELL_DIM; m++)
 					{
-						grassCount += 1 + ((d.info[idx] & 0xf0) >> 4);
+						int idx = l * TerrainConst.GRASS_CHUNK_CELL_DIM + m;
+						
+						int texPos = d.texPos[idx] - 1;
+						if (texPos != i || d.size[idx] <= 0) continue;
+						if (grassCounter++ % grassSkip != 0) continue;
+
+						grassCount++;
 					}
 				}
 			}
@@ -142,14 +148,17 @@ namespace Terrain
 			{
 				return;
 			}
+			grassCounter = 0;
 
 			Random.seed = d.seed;
 
 			Vector3 chunkPos = new Vector3 ();
 			chunkPos.x = (float)d.posX * TerrainConst.TERRAIN_CHUNK_SIZE;
 			chunkPos.z = (float)d.posZ * TerrainConst.TERRAIN_CHUNK_SIZE;
-			chunkPos.y = GetTerrainHeight(chunkPos.x + TerrainConst.TERRAIN_CHUNK_HALF_SIZE, 
-			                              chunkPos.z + TerrainConst.TERRAIN_CHUNK_HALF_SIZE);
+			chunkPos.y = GetTerrainHeight(chunkPos.x + TerrainConst.TERRAIN_CHUNK_HALF_SIZE,  chunkPos.z + TerrainConst.TERRAIN_CHUNK_HALF_SIZE);
+
+			List<GrassChunkCell> cellList = new List<GrassChunkCell>();
+			GrassChunkCell[,] cellMap = new GrassChunkCell[TerrainConst.GRASS_CHUNK_CELL_DIM, TerrainConst.GRASS_CHUNK_CELL_DIM];
 
 			Vector3[] vertices = new Vector3[grassCount * 4];
 			Color32[] colors = new Color32[grassCount * 4];
@@ -158,13 +167,7 @@ namespace Terrain
 			Vector3[] normals = new Vector3[grassCount * 4];
 			List<int> triangles = new List<int>();
 
-			//List<CGrassFast.CState> list = new List<CGrassFast.CState>();
-			//CGrassFast.CState[,] array8 = new CGrassFast.CState[32, 32];
-
 			int vertIndex = 0;
-			int vertStride = 0;
-			int grassCounter = 0;
-			int grassSkip = 2;
 
 			for (int i = 0; i < d.textureIndeics.Length; i++)
 			{
@@ -181,9 +184,8 @@ namespace Terrain
 					{
 						int idx = l * TerrainConst.GRASS_CHUNK_CELL_DIM + m;
 
-						int texPos = (int)(d.info[idx] & 0xf) - 1;
-						int density = (int)(d.info[idx] & 0xf0) >> 4;
-						int size = (int)d.size[idx];
+						int texPos = d.texPos[idx] - 1;
+						int size = d.size[idx];
 
 						if (texPos != i || d.size[idx] <= 0) continue;
 						if (grassCounter++ % grassSkip != 0) continue;
@@ -192,7 +194,7 @@ namespace Terrain
 						float gz = (float)l * TerrainConst.GRASS_CHUNK_CELL_SIZE + Random.Range(0f, 0.26f);
 						float gy = GetTerrainHeight(gx + chunkPos.x, gz + chunkPos.z) - chunkPos.y;
 						int rotation = Random.Range(0, 63);
-						int state = Random.Range(0, 255);
+						int waveSpeed = Random.Range(0, 255);
 
 						float sx = gx;
 						float sz = gz;
@@ -200,85 +202,82 @@ namespace Terrain
 						float s = (float)size;
 						float hw = aspect / 2f;
 
-						int grassPieceIndex = vertStride;
-						for (int n = 0; n < 1 + density; n++)
-						{
-							float hwsinr = hw * Mathf.Sin(r);
-							float hwcosr = hw * Mathf.Cos(r);
+						float hwsinr = hw * Mathf.Sin(r);
+						float hwcosr = hw * Mathf.Cos(r);
+						
+						vertices[vertIndex + 0].x = -hwcosr * s + sx;
+						vertices[vertIndex + 0].y =  1 * s + gy;
+						vertices[vertIndex + 0].z = -hwsinr * s + sz;
+						vertices[vertIndex + 1].x =  hwcosr * s + sx;
+						vertices[vertIndex + 1].y =  1 * s + gy;
+						vertices[vertIndex + 1].z =  hwsinr * s + sz;
+						vertices[vertIndex + 2].x = -hwcosr * s + sx;
+						vertices[vertIndex + 2].y =  0 * s + gy;
+						vertices[vertIndex + 2].z = -hwsinr * s + sz;
+						vertices[vertIndex + 3].x =  hwcosr * s + sx;
+						vertices[vertIndex + 3].y =  0 * s + gy;
+						vertices[vertIndex + 3].z =  hwsinr * s + sz;
+						
+						r = Mathf.Deg2Rad * (Random.Range(0, 360f) * -60f + -30f);
+						sx = gx + Random.Range(-1f, 1f) * hw * s;
+						sz = gz + Random.Range(-1f, 1f) * hw * s;
+
+						uvs[vertIndex + 0].x = rect.xMin;
+						uvs[vertIndex + 0].y = rect.yMax - 0.01f;
+						uvs[vertIndex + 1].x = rect.xMax;
+						uvs[vertIndex + 1].y = rect.yMax - 0.01f;
+						uvs[vertIndex + 2].x = rect.xMin;
+						uvs[vertIndex + 2].y = rect.yMin;
+						uvs[vertIndex + 3].x = rect.xMax;
+						uvs[vertIndex + 3].y = rect.yMin;
+
+						colors[vertIndex + 0] = useColors[texIndex];
+						colors[vertIndex + 1] = useColors[texIndex];
+						colors[vertIndex + 2] = useColors[texIndex];
+						colors[vertIndex + 3] = useColors[texIndex];
+
+						uv3[vertIndex + 0].x = 1;
+						uv3[vertIndex + 0].y = waveSpeed;
+						uv3[vertIndex + 1].x = 1;
+						uv3[vertIndex + 1].y = waveSpeed;
+						uv3[vertIndex + 2].x = 0f;
+						uv3[vertIndex + 2].y = 0f;
+						uv3[vertIndex + 3].x = 0f;
+						uv3[vertIndex + 3].y = 0f;
 							
-							vertices[vertIndex + 0].x = -hwcosr * s + sx;
-							vertices[vertIndex + 0].y =  1 * s + gy;
-							vertices[vertIndex + 0].z = -hwsinr * s + sz;
-							vertices[vertIndex + 1].x =  hwcosr * s + sx;
-							vertices[vertIndex + 1].y =  1 * s + gy;
-							vertices[vertIndex + 1].z =  hwsinr * s + sz;
-							vertices[vertIndex + 2].x = -hwcosr * s + sx;
-							vertices[vertIndex + 2].y =  0 * s + gy;
-							vertices[vertIndex + 2].z = -hwsinr * s + sz;
-							vertices[vertIndex + 3].x =  hwcosr * s + sx;
-							vertices[vertIndex + 3].y =  0 * s + gy;
-							vertices[vertIndex + 3].z =  hwsinr * s + sz;
-							
-							r = Mathf.Deg2Rad * (Random.Range(0, 360f) * -60f + -30f);
-							sx = gx + Random.Range(-1f, 1f) * hw * s;
-							sz = gz + Random.Range(-1f, 1f) * hw * s;
+						normals[vertIndex + 0].x = 0f;
+						normals[vertIndex + 0].y = 1f;
+						normals[vertIndex + 0].z = 0f;
+						normals[vertIndex + 1].x = 0f;
+						normals[vertIndex + 1].y = 1f;
+						normals[vertIndex + 1].z = 0f;
+						normals[vertIndex + 2].x = 0f;
+						normals[vertIndex + 2].y = 1f;
+						normals[vertIndex + 2].z = 0f;
+						normals[vertIndex + 3].x = 0f;
+						normals[vertIndex + 3].y = 1f;
+						normals[vertIndex + 3].z = 0f;
 
-							uvs[vertIndex + 0].x = rect.xMin;
-							uvs[vertIndex + 0].y = rect.yMax - 0.01f;
-							uvs[vertIndex + 1].x = rect.xMax;
-							uvs[vertIndex + 1].y = rect.yMax - 0.01f;
-							uvs[vertIndex + 2].x = rect.xMin;
-							uvs[vertIndex + 2].y = rect.yMin;
-							uvs[vertIndex + 3].x = rect.xMax;
-							uvs[vertIndex + 3].y = rect.yMin;
+						triangles.Add(vertIndex + 0);
+						triangles.Add(vertIndex + 1);
+						triangles.Add(vertIndex + 2);
+						triangles.Add(vertIndex + 1);
+						triangles.Add(vertIndex + 3);
+						triangles.Add(vertIndex + 2);
 
-							colors[vertIndex + 0] = useColors[texIndex];
-							colors[vertIndex + 1] = useColors[texIndex];
-							colors[vertIndex + 2] = useColors[texIndex];
-							colors[vertIndex + 3] = useColors[texIndex];
+						GrassChunkCell cell = new GrassChunkCell();
+						cell.vertStart = vertIndex;
+						cell.waveSpeed = (float)waveSpeed;
+						cell.waveSpeedStep = 1 + Random.Range(0.0f, 1.0f);
+						cell.strength = 1;
+						cell.strengthFactor = 0.1f;
+						cell.isDisturb = true;
+						cell.waveSpeedStart = waveSpeed;
 
-							uv3[vertIndex + 0].x = 0.5f;
-							uv3[vertIndex + 0].y = (float)state/100000f;
-							uv3[vertIndex + 1].x = 0.5f;
-							uv3[vertIndex + 1].y = (float)state/100000f;
-							uv3[vertIndex + 2].x = 0f;
-							uv3[vertIndex + 2].y = (float)state/100000f;
-							uv3[vertIndex + 3].x = 0f;
-							uv3[vertIndex + 3].y = (float)state/100000f;
-								
-							normals[vertIndex + 0].x = 0f;
-							normals[vertIndex + 0].y = 1f;
-							normals[vertIndex + 0].z = 0f;
-							normals[vertIndex + 1].x = 0f;
-							normals[vertIndex + 1].y = 1f;
-							normals[vertIndex + 1].z = 0f;
-							normals[vertIndex + 2].x = 0f;
-							normals[vertIndex + 2].y = 1f;
-							normals[vertIndex + 2].z = 0f;
-							normals[vertIndex + 3].x = 0f;
-							normals[vertIndex + 3].y = 1f;
-							normals[vertIndex + 3].z = 0f;
+						cellList.Add(cell);
+						cellMap[m, l] = cell;
 
-							triangles.Add(vertIndex + 0);
-							triangles.Add(vertIndex + 1);
-							triangles.Add(vertIndex + 2);
-							triangles.Add(vertIndex + 1);
-							triangles.Add(vertIndex + 3);
-							triangles.Add(vertIndex + 2);
-							vertIndex += 4;
-							vertStride++;
-						}
-						//CGrassFast.CState cState = new CGrassFast.CState();
-						//cState.m_State = (float)num20;
-						//cState.m_Step = 1f + Random.Range(0f, 1f);
-						//cState.m_Touch = 1f;
-						//cState.m_TouchFactor = 0.1f;
-						//cState.m_TouchBegin = false;
-						//cState.m_SizeOrStartState = ((!useGPU) ? ((int)data.m_Size[num16]) : num20);
-						//cState.m_GrassPieceIndex = grassPieceIndex;
-						//cState.m_Density = density;
-						//list.Add(cState);
-						//array8[l, m] = cState;
+						vertIndex += 4;
 					}
 				}
 			}
@@ -317,8 +316,8 @@ namespace Terrain
 			GrassChunk gChunk = gameObject.GetComponent<GrassChunk>();
 			if (gChunk == null) gChunk = gameObject.AddComponent<GrassChunk>();
 			gChunk.basePos = chunkPos;
-			//gChunk.m_StateList = list.ToArray();
-			//gChunk.m_StateTable = array8;
+			gChunk.cellList = cellList;
+			gChunk.cellMap = cellMap;
 			gChunk.meshRenderer = meshRenderer;
 			gChunk.meshFilter = meshFilter;
 			gChunk.uv3 = uv3;
