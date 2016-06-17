@@ -15,13 +15,7 @@ Shader "Custom/CharacterRimLit"
 	SubShader {
 		Tags{ "RenderType" = "Opaque" "Queue" = "Transparent-1" }
 		LOD 200
-		Pass
-		{
 
-		}
-
-		Pass
-		{
 			CGPROGRAM
 			#pragma surface surf Standard fullforwardshadows
 
@@ -62,7 +56,6 @@ Shader "Custom/CharacterRimLit"
 				o.Emission = _RimColor.rgb * pow(rim, _RimPower);
 			}
 			ENDCG
-		}		
 	}
 	FallBack "Diffuse"
 }
