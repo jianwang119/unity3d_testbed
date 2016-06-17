@@ -14,11 +14,14 @@ public class GrassInspector : Editor
 			Terrain.Grass g = target as Terrain.Grass;
 			if (g != null)
 			{
-				Terrain.GrassChunkData data = g.burshChunks[0];
-				for (int i = 0; i < Terrain.TerrainConst.GRASS_CHUNK_CELL_COUNT; i++)
+				for (int i = 0; i < g.brushChunks.Length; i++)
 				{
-					data.size[i] = 2;
-					data.texPos[i] = (byte)(i > 32*16 ? 1: 2);
+					Terrain.GrassChunkData data = g.brushChunks[i];
+					for (int j = 0; j < Terrain.TerrainConst.GRASS_CHUNK_CELL_COUNT; j++)
+					{
+						data.size[j] = (ushort)(Random.Range(2, 4));
+						data.texPos[j] = (byte)(j > 32*16 ? 1: 2);
+					}
 				}
 			}
 		}

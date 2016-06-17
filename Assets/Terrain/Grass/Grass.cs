@@ -7,7 +7,7 @@ namespace Terrain
 	public class Grass : MonoBehaviour 
 	{
 		// TODO data for brush
-		public GrassChunkData[] burshChunks;
+		public GrassChunkData[] brushChunks;
 		public Texture2D[] useTextures;
 		public Color[] useColors; 
 
@@ -107,9 +107,9 @@ namespace Terrain
 
 		private void BuildGrassChunks()
 		{
-			for (int i = 0; i < burshChunks.Length; i++)
+			for (int i = 0; i < brushChunks.Length; i++)
 			{
-				GrassChunkData d = burshChunks[i];
+				GrassChunkData d = brushChunks[i];
 				if (d != null && d.textureIndeics.Length > 0)
 				{
 					BuildGrassChunk(d);
