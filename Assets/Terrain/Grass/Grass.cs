@@ -7,14 +7,14 @@ namespace Terrain
 	public class Grass : MonoBehaviour 
 	{
 		// TODO data for brush
-		public GrassChunkData[] brushChunks;
+		public GrassTileData[] brushTiles;
 		public Texture2D[] useTextures;
 		public Color[] useColors; 
 
 		public static Grass Inst = null;
 
 		private int frameUpdate = 0;
-		private List<GrassChunk> chunkList = new List<GrassChunk>();
+		private List<GrassTile> tileList = new List<GrassTile>();
 
 		private Texture2D packedTexture;
 		private Rect[] packedRect;
@@ -28,7 +28,7 @@ namespace Terrain
 
 		void OnDestroy()
 		{
-			ClearGrassChunks();
+			ClearGrassTiles();
 		}
 
 		void Start () 
@@ -45,15 +45,15 @@ namespace Terrain
 				packedMaterial.SetFloat("_FrameUpdate", (float)frameUpdate);
 			}
 
-			for (int i = 0; i < chunkList.Count; i++)
+			for (int i = 0; i < tileList.Count; i++)
 			{
-				chunkList[i].OnUpdate(frameUpdate);
+				tileList[i].OnUpdate(frameUpdate);
 			}
 		}
 
 		void GenerateGrass()
 		{
-			ClearGrassChunks();
+			ClearGrassTiles();
 
 			if (useColors == null && useTextures != null)
 			{
@@ -67,7 +67,7 @@ namespace Terrain
 
 			BuildMaterial();
 
-			BuildGrassChunks();
+			BuildGrassTiles();
 		}
 
 		private void BuildMaterial()
@@ -105,19 +105,19 @@ namespace Terrain
 			packedMaterial.mainTexture = packedTexture;
 		}
 
-		private void BuildGrassChunks()
+		private void BuildGrassTiles()
 		{
-			for (int i = 0; i < brushChunks.Length; i++)
+			for (int i = 0; i < brushTiles.Length; i++)
 			{
-				GrassChunkData d = brushChunks[i];
+				GrassTileData d = brushTiles[i];
 				if (d != null && d.textureIndeics.Length > 0)
 				{
-					BuildGrassChunk(d);
+					BuildGrassTile(d);
 				}
 			}
 		}
 
-		private void BuildGrassChunk(GrassChunkData d)
+		private void BuildGrassTile(GrassTileData d)
 		{
 			if (d == null || d.textureIndeics == null)
 			{
@@ -130,13 +130,13 @@ namespace Terrain
 
 			for (int i = 0; i < d.textureIndeics.Length; i++)
 			{
-				for (int l = 0; l < TerrainConst.GRASS_CHUNK_CELL_DIM; l++)
+				for (int l = 0; l < Utils.GRASS_TILE_CELL_DIM; l++)
 				{
-					for (int m = 0; m < TerrainConst.GRASS_CHUNK_CELL_DIM; m++)
+					for (int m = 0; m < Utils.GRASS_TILE_CELL_DIM; m++)
 					{
-						int idx = l * TerrainConst.GRASS_CHUNK_CELL_DIM + m;
+						int idx = l * Utils.GRASS_TILE_CELL_DIM + m;
 						
-						int texPos = d.texPos[idx] - 1;
+						int texPos = d.texture[idx];
 						if (texPos != i || d.size[idx] <= 0) continue;
 						if (grassCounter++ % grassSkip != 0) continue;
 
@@ -152,13 +152,13 @@ namespace Terrain
 
 			Random.seed = d.seed;
 
-			Vector3 chunkPos = new Vector3 ();
-			chunkPos.x = (float)d.posX * TerrainConst.TERRAIN_CHUNK_SIZE;
-			chunkPos.z = (float)d.posZ * TerrainConst.TERRAIN_CHUNK_SIZE;
-			chunkPos.y = GetTerrainHeight(chunkPos.x + TerrainConst.TERRAIN_CHUNK_HALF_SIZE,  chunkPos.z + TerrainConst.TERRAIN_CHUNK_HALF_SIZE);
+            Vector3 tilePos = new Vector3();
+            tilePos.x = (float)d.posX * Utils.TERRAIN_TILE_SIZE;
+            tilePos.z = (float)d.posZ * Utils.TERRAIN_TILE_SIZE;
+            tilePos.y = GetTerrainHeight(tilePos.x + Utils.TERRAIN_TILE_HALF_SIZE, tilePos.z + Utils.TERRAIN_TILE_HALF_SIZE);
 
-			List<GrassChunkCell> cellList = new List<GrassChunkCell>();
-			GrassChunkCell[,] cellMap = new GrassChunkCell[TerrainConst.GRASS_CHUNK_CELL_DIM, TerrainConst.GRASS_CHUNK_CELL_DIM];
+			List<GrassTileCell> cellList = new List<GrassTileCell>();
+			GrassTileCell[,] cellMap = new GrassTileCell[Utils.GRASS_TILE_CELL_DIM, Utils.GRASS_TILE_CELL_DIM];
 
 			Vector3[] vertices = new Vector3[grassCount * 4];
 			Color32[] colors = new Color32[grassCount * 4];
@@ -178,21 +178,21 @@ namespace Terrain
 				float aspect = 1f;
 				GetTexture(texIndex, ref tex, ref rect, ref aspect);
 
-				for (int l = 0; l < TerrainConst.GRASS_CHUNK_CELL_DIM; l++)
+				for (int l = 0; l < Utils.GRASS_TILE_CELL_DIM; l++)
 				{
-					for (int m = 0; m < TerrainConst.GRASS_CHUNK_CELL_DIM; m++)
+					for (int m = 0; m < Utils.GRASS_TILE_CELL_DIM; m++)
 					{
-						int idx = l * TerrainConst.GRASS_CHUNK_CELL_DIM + m;
+						int idx = l * Utils.GRASS_TILE_CELL_DIM + m;
 
-						int texPos = d.texPos[idx] - 1;
+						int texPos = d.texture[idx];
 						int size = d.size[idx];
 
 						if (texPos != i || d.size[idx] <= 0) continue;
 						if (grassCounter++ % grassSkip != 0) continue;
 
-						float gx = (float)m * TerrainConst.GRASS_CHUNK_CELL_SIZE + Random.Range(0f, 0.26f);
-						float gz = (float)l * TerrainConst.GRASS_CHUNK_CELL_SIZE + Random.Range(0f, 0.26f);
-						float gy = GetTerrainHeight(gx + chunkPos.x, gz + chunkPos.z) - chunkPos.y;
+						float gx = (float)m * Utils.GRASS_TILE_CELL_SIZE + Random.Range(0f, 0.26f);
+						float gz = (float)l * Utils.GRASS_TILE_CELL_SIZE + Random.Range(0f, 0.26f);
+                        float gy = GetTerrainHeight(gx + tilePos.x, gz + tilePos.z) - tilePos.y;
 						int rotation = Random.Range(0, 63);
 						int waveSpeed = Random.Range(0, 255);
 
@@ -265,7 +265,7 @@ namespace Terrain
 						triangles.Add(vertIndex + 3);
 						triangles.Add(vertIndex + 2);
 
-						GrassChunkCell cell = new GrassChunkCell();
+						GrassTileCell cell = new GrassTileCell();
 						cell.vertStart = vertIndex;
 						cell.waveSpeed = (float)waveSpeed;
 						cell.waveSpeedStep = 1 + Random.Range(0.0f, 1.0f);
@@ -282,9 +282,9 @@ namespace Terrain
 				}
 			}
 
-			// create grass chunk
-			string chunkName = string.Format("GrassChunk({0},{1})", d.posX, d.posZ);
-			GameObject gameObject = new GameObject (chunkName);
+			// create grass tile
+            string tileName = string.Format("GrassTile({0},{1})", d.posX, d.posZ);
+            GameObject gameObject = new GameObject(tileName);
 			
 			gameObject.transform.parent = transform;
 			gameObject.transform.localPosition = Vector3.zero;
@@ -293,7 +293,7 @@ namespace Terrain
 			gameObject.hideFlags = HideFlags.DontSaveInEditor;
 			gameObject.layer = LayerMask.NameToLayer("Terrain");
 
-			gameObject.transform.localPosition = chunkPos;
+            gameObject.transform.localPosition = tilePos;
 
 			Mesh mesh = new Mesh();
 			mesh.vertices = vertices;
@@ -313,30 +313,30 @@ namespace Terrain
 			meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 			mesh.MarkDynamic();
 
-			GrassChunk gChunk = gameObject.GetComponent<GrassChunk>();
-			if (gChunk == null) gChunk = gameObject.AddComponent<GrassChunk>();
-			gChunk.basePos = chunkPos;
-			gChunk.cellList = cellList;
-			gChunk.cellMap = cellMap;
-			gChunk.meshRenderer = meshRenderer;
-			gChunk.meshFilter = meshFilter;
-			gChunk.uv3 = uv3;
-			gChunk.Init();
-			chunkList.Add(gChunk);
+			GrassTile tile = gameObject.GetComponent<GrassTile>();
+            if (tile == null) tile = gameObject.AddComponent<GrassTile>();
+            tile.basePos = tilePos;
+            tile.cellList = cellList;
+            tile.cellMap = cellMap;
+            tile.meshRenderer = meshRenderer;
+            tile.meshFilter = meshFilter;
+            tile.uv3 = uv3;
+            tile.Init();
+            tileList.Add(tile);
 		}
 
-		private void ClearGrassChunks()
+		private void ClearGrassTiles()
 		{
-			if (chunkList == null) 
+			if (tileList == null) 
 			{
 				return;
 			}
 
-			for (int i = 0; i < chunkList.Count; i++)
+			for (int i = 0; i < tileList.Count; i++)
 			{
-				if (!(chunkList[i] == null))
+				if (!(tileList[i] == null))
 				{
-					GameObject grassGo = chunkList[i].gameObject;
+					GameObject grassGo = tileList[i].gameObject;
 					MeshFilter mf = grassGo.GetComponent<MeshFilter>();
 					if (mf != null)
 					{
@@ -345,7 +345,7 @@ namespace Terrain
 					Object.DestroyImmediate(grassGo);
 				}
 			}
-			chunkList.Clear();
+			tileList.Clear();
 		}
 
 		private bool GetTexture(int index, ref Texture2D tex, ref Rect rect, ref float aspect)
@@ -368,9 +368,9 @@ namespace Terrain
 
 		public void Disturb(Vector3 pos, float radius, float strength)
 		{
-			for (int i = 0; i < chunkList.Count; i++)
+			for (int i = 0; i < tileList.Count; i++)
 			{
-				chunkList[i].Disturb(pos, radius, strength);
+				tileList[i].Disturb(pos, radius, strength);
 			}
 		}
 	}

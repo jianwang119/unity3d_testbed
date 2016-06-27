@@ -32,10 +32,10 @@ Shader "Terrain/Grass"
 		{
 			half2 disturb = v.texcoord2;
 			disturb.y += _FrameUpdate;
-			disturb.y *= 0.025f;
+			disturb.y *= 0.015f;
 			half s = sin(disturb.y);
 			half c = cos(disturb.y);
-			half3 waveMove = float3(s, 0, c) * disturb.x * 0.08f;
+			half3 waveMove = float3(s, 0, c) * disturb.x * 0.05f;
 			v.vertex.xz += waveMove.xz;
 		}
 					
