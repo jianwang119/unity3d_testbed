@@ -192,15 +192,16 @@ namespace Terrain
 
 		void OnDrawGizmos()
 		{
-			if (isVisible)
+			if (isVisible && UnityEditor.Selection.activeGameObject == gameObject)
 			{
-                Vector3 size = new Vector3(Utils.TERRAIN_TILE_SIZE, 2, Utils.TERRAIN_TILE_SIZE);
-				Vector3 center = transform.position + size / 2;
 				Gizmos.matrix = transform.localToWorldMatrix;
-				Gizmos.color = (UnityEditor.Selection.activeGameObject == gameObject) ? Color.grey : Color.green;
+				Gizmos.color = Color.grey;
+
+                Vector3 size = new Vector3(Utils.TERRAIN_TILE_SIZE, 2, Utils.TERRAIN_TILE_SIZE);
+                Vector3 center = size / 2;
 				Gizmos.DrawWireCube(center, size);
 
-                Vector3 csize = new Vector3(Utils.GRASS_TILE_CELL_SIZE, Utils.GRASS_TILE_CELL_SIZE, Utils.GRASS_TILE_CELL_SIZE);
+                Vector3 csize = new Vector3(Utils.GRASS_TILE_CELL_SIZE, 1.5f, Utils.GRASS_TILE_CELL_SIZE);
                 for (int i = 0; i < Utils.GRASS_TILE_CELL_DIM; i++)
 				{
                     for (int j = 0; j < Utils.GRASS_TILE_CELL_DIM; j++)
