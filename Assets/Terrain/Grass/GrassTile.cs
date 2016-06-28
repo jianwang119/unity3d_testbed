@@ -21,9 +21,9 @@ namespace Terrain
 		public int waveSpeedStart;
 		public float waveSpeed;
 		public float waveSpeedStep;
-		public float strength;
-		public float strengthFactor;
-		public bool isDisturb;
+		public float turbulenceScale;
+		public float turbulenceScaleFactor;
+		public bool isTurbulence;
 	}
 
 	public class GrassTile : MonoBehaviour 
@@ -79,31 +79,31 @@ namespace Terrain
 				{
 					GrassTileCell cell = cellList[i];
 
-					if (cell.isDisturb || cell.strength > 1)
+					if (cell.isTurbulence || cell.turbulenceScale > 1)
 					{
 						updateMesh = true;
 
-						float n = (!cell.isDisturb) ? cell.strength : cell.strength * cell.strengthFactor;
-						cell.waveSpeed += cell.waveSpeedStep * ((n - 1) * 4 / 7 + 1);
+						float n = (!cell.isTurbulence) ? cell.turbulenceScale : cell.turbulenceScale * cell.turbulenceScaleFactor;
+						cell.waveSpeed += cell.waveSpeedStep * ((n - 1) / 2 + 1);
 
 						uv3[cell.vertStart + 0].x = n;
 						uv3[cell.vertStart + 0].y = cell.waveSpeed - ((float)cell.waveSpeedStart + cell.waveSpeedStep * (float)updateFrame);
 						uv3[cell.vertStart + 1].x = uv3[cell.vertStart + 0].x;
 						uv3[cell.vertStart + 1].y = uv3[cell.vertStart + 0].y;
 
-						if (cell.isDisturb)
+						if (cell.isTurbulence)
 						{
-							cell.strengthFactor += 0.15f;
-							if (cell.strengthFactor > 1)
+							cell.turbulenceScaleFactor += 0.15f;
+							if (cell.turbulenceScaleFactor > 1)
 							{
-								cell.strengthFactor = 1;
-								cell.isDisturb = false;
+								cell.turbulenceScaleFactor = 1;
+								cell.isTurbulence = false;
 							}
 						}
 						else
 						{
-							cell.strength = n > 1 ? n * 0.95f : 1;
-							cell.strengthFactor *= 0.95f;
+							cell.turbulenceScale = n > 1 ? n * 0.95f : 1;
+							cell.turbulenceScaleFactor *= 0.95f;
 						}
 					}
 				}
@@ -119,7 +119,7 @@ namespace Terrain
 			}
 		}
 
-		public void Disturb(Vector3 pos, float radius, float strength)
+		public void AddTurbulence(Vector3 pos, float radius, float scale)
 		{
 			if (!gameObject.activeSelf)
 			{
@@ -146,11 +146,11 @@ namespace Terrain
             int cz1 = Utils.PosToGrid(z1, Utils.GRASS_TILE_CELL_SIZE, Utils.GRASS_TILE_CELL_DIM);
             int cz2 = Utils.PosToGrid(z2, Utils.GRASS_TILE_CELL_SIZE, Utils.GRASS_TILE_CELL_DIM);
 
-			if (strength < 0)
-				strength = 0;
+			if (scale < 0)
+				scale = 0;
 
-			if (strength > 1f)
-				radius *= strength;
+			if (scale > 1f)
+				radius *= scale;
 
 			for (int i = cz1; i <= cz2; i++)
 			{
@@ -160,31 +160,33 @@ namespace Terrain
 
 					if (cell != null)
 					{
-						float cx = Utils.GridToPos(j, Utils.GRASS_TILE_CELL_SIZE);
-						float cz =  Utils.GridToPos(i, Utils.GRASS_TILE_CELL_SIZE);
+                        float cx = Utils.GridToPos(j, Utils.GRASS_TILE_CELL_SIZE) + Utils.GRASS_TILE_CELL_HALF_SIZE;
+                        float cz = Utils.GridToPos(i, Utils.GRASS_TILE_CELL_SIZE) + Utils.GRASS_TILE_CELL_HALF_SIZE;
 
 						float dis = Mathf.Sqrt((cx - posx) * (cx - posx) + (cz - posz) * (cz - posz));
-						if (dis < radius)
+						if (dis > radius)
 						{
-							float f = (1f - dis / radius) * 7f + 1f;
-							f *= strength;
-							if (cell.strength < f)
-							{
-								cell.strength = f;
-								float ff = Mathf.Acos((cx - posx) / dis);
-								if (cz < posz)
-								{
-									ff = 2 * Mathf.PI - ff;
-								}
-								cell.waveSpeed = 256 * ff / (2 * Mathf.PI);
-								cell.isDisturb = true;
-								if (cell.strengthFactor < 0.1f)
-								{
-									cell.strengthFactor = 0.1f;
-								}
-								isDirty = true;
-							}
-						}
+                            continue;
+                        }
+
+                        float f = (1f - dis / radius) * 8f + 1f;
+                        f *= scale;
+                        if (cell.turbulenceScale < f)
+                        {
+                            cell.turbulenceScale = f;
+                            float ff = Mathf.Acos((cx - posx) / dis);
+                            if (cz < posz)
+                            {
+                                ff = 2 * Mathf.PI - ff;
+                            }
+                            cell.waveSpeed = 256 * ff / (2 * Mathf.PI);
+                            if (cell.turbulenceScaleFactor < 0.1f)
+                            {
+                                cell.turbulenceScaleFactor = 0.1f;
+                            }
+                            cell.isTurbulence = true;
+                            isDirty = true;
+                        }
 					}
 				}
 			}

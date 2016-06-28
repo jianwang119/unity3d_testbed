@@ -155,7 +155,7 @@ namespace Terrain
             Vector3 tilePos = new Vector3();
             tilePos.x = (float)d.posX * Utils.TERRAIN_TILE_SIZE;
             tilePos.z = (float)d.posZ * Utils.TERRAIN_TILE_SIZE;
-            tilePos.y = GetTerrainHeight(tilePos.x + Utils.TERRAIN_TILE_HALF_SIZE, tilePos.z + Utils.TERRAIN_TILE_HALF_SIZE);
+            tilePos.y = Utils.GetTerrainHeight(tilePos.x + Utils.TERRAIN_TILE_HALF_SIZE, tilePos.z + Utils.TERRAIN_TILE_HALF_SIZE);
 
 			List<GrassTileCell> cellList = new List<GrassTileCell>();
 			GrassTileCell[,] cellMap = new GrassTileCell[Utils.GRASS_TILE_CELL_DIM, Utils.GRASS_TILE_CELL_DIM];
@@ -192,7 +192,7 @@ namespace Terrain
 
 						float gx = (float)m * Utils.GRASS_TILE_CELL_SIZE + Random.Range(0f, 0.26f);
 						float gz = (float)l * Utils.GRASS_TILE_CELL_SIZE + Random.Range(0f, 0.26f);
-                        float gy = GetTerrainHeight(gx + tilePos.x, gz + tilePos.z) - tilePos.y;
+                        float gy = Utils.GetTerrainHeight(gx + tilePos.x, gz + tilePos.z) - tilePos.y;
 						int rotation = Random.Range(0, 63);
 						int waveSpeed = Random.Range(0, 255);
 
@@ -268,11 +268,11 @@ namespace Terrain
 						GrassTileCell cell = new GrassTileCell();
 						cell.vertStart = vertIndex;
 						cell.waveSpeed = (float)waveSpeed;
+                        cell.waveSpeedStart = waveSpeed;
 						cell.waveSpeedStep = 1 + Random.Range(0.0f, 1.0f);
-						cell.strength = 1;
-						cell.strengthFactor = 0.1f;
-						cell.isDisturb = true;
-						cell.waveSpeedStart = waveSpeed;
+						cell.turbulenceScale = 1;
+						cell.turbulenceScaleFactor = 0.1f;
+						cell.isTurbulence = true;						
 
 						cellList.Add(cell);
 						cellMap[m, l] = cell;
@@ -360,17 +360,11 @@ namespace Terrain
 			return false;
 		}
 
-		// TODO
-		private float GetTerrainHeight(float x, float z)
-		{
-			return 0;
-		}
-
-		public void Disturb(Vector3 pos, float radius, float strength)
+		public void AddTurbulence(Vector3 pos, float radius, float strength)
 		{
 			for (int i = 0; i < tileList.Count; i++)
 			{
-				tileList[i].Disturb(pos, radius, strength);
+				tileList[i].AddTurbulence(pos, radius, strength);
 			}
 		}
 	}

@@ -21,7 +21,7 @@ public class MoveObject : MonoBehaviour
 
             if ((lastPos - curPos).magnitude > 0.5f)
             {
-                Terrain.Grass.Inst.Disturb(curPos, radius, strength);
+                Terrain.Grass.Inst.AddTurbulence(curPos, radius, strength);
                 lastPos = curPos;
             }
 		}
