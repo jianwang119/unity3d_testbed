@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Terrain
+namespace Core
 {
 	[System.Serializable]
 	public class GrassTileData
@@ -10,8 +10,8 @@ namespace Terrain
 		public int posX;
 		public int posZ;
 		public int seed;
-		public ushort[] size = new ushort[Utils.GRASS_TILE_CELL_COUNT];
-		public byte[] texture = new byte[Utils.GRASS_TILE_CELL_COUNT];
+		public ushort[] size = new ushort[TerrainUtils.GRASS_TILE_CELL_COUNT];
+		public byte[] texture = new byte[TerrainUtils.GRASS_TILE_CELL_COUNT];
 		public int[] textureIndeics;
 	}
 
@@ -136,15 +136,15 @@ namespace Terrain
 			float z2 = posz + radius;
 
 			// out of bounds
-			if (x1 > Utils.TERRAIN_TILE_SIZE || x2 < 0f || z1 > Utils.TERRAIN_TILE_SIZE || z2 < 0f) 
+			if (x1 > TerrainUtils.TERRAIN_TILE_SIZE || x2 < 0f || z1 > TerrainUtils.TERRAIN_TILE_SIZE || z2 < 0f) 
 			{
 				return;
 			}
 
-            int cx1 = Utils.PosToGrid(x1, Utils.GRASS_TILE_CELL_SIZE, Utils.GRASS_TILE_CELL_DIM);
-            int cx2 = Utils.PosToGrid(x2, Utils.GRASS_TILE_CELL_SIZE, Utils.GRASS_TILE_CELL_DIM);
-            int cz1 = Utils.PosToGrid(z1, Utils.GRASS_TILE_CELL_SIZE, Utils.GRASS_TILE_CELL_DIM);
-            int cz2 = Utils.PosToGrid(z2, Utils.GRASS_TILE_CELL_SIZE, Utils.GRASS_TILE_CELL_DIM);
+            int cx1 = TerrainUtils.PosToGrid(x1, TerrainUtils.GRASS_TILE_CELL_SIZE, TerrainUtils.GRASS_TILE_CELL_DIM);
+            int cx2 = TerrainUtils.PosToGrid(x2, TerrainUtils.GRASS_TILE_CELL_SIZE, TerrainUtils.GRASS_TILE_CELL_DIM);
+            int cz1 = TerrainUtils.PosToGrid(z1, TerrainUtils.GRASS_TILE_CELL_SIZE, TerrainUtils.GRASS_TILE_CELL_DIM);
+            int cz2 = TerrainUtils.PosToGrid(z2, TerrainUtils.GRASS_TILE_CELL_SIZE, TerrainUtils.GRASS_TILE_CELL_DIM);
 
 			if (scale < 0)
 				scale = 0;
@@ -160,8 +160,8 @@ namespace Terrain
 
 					if (cell != null)
 					{
-                        float cx = Utils.GridToPos(j, Utils.GRASS_TILE_CELL_SIZE) + Utils.GRASS_TILE_CELL_HALF_SIZE;
-                        float cz = Utils.GridToPos(i, Utils.GRASS_TILE_CELL_SIZE) + Utils.GRASS_TILE_CELL_HALF_SIZE;
+                        float cx = TerrainUtils.GridToPos(j, TerrainUtils.GRASS_TILE_CELL_SIZE) + TerrainUtils.GRASS_TILE_CELL_HALF_SIZE;
+                        float cz = TerrainUtils.GridToPos(i, TerrainUtils.GRASS_TILE_CELL_SIZE) + TerrainUtils.GRASS_TILE_CELL_HALF_SIZE;
 
 						float dis = Mathf.Sqrt((cx - posx) * (cx - posx) + (cz - posz) * (cz - posz));
 						if (dis > radius)
@@ -199,20 +199,20 @@ namespace Terrain
 				Gizmos.matrix = transform.localToWorldMatrix;
 				Gizmos.color = Color.grey;
 
-                Vector3 size = new Vector3(Utils.TERRAIN_TILE_SIZE, 2, Utils.TERRAIN_TILE_SIZE);
+                Vector3 size = new Vector3(TerrainUtils.TERRAIN_TILE_SIZE, 2, TerrainUtils.TERRAIN_TILE_SIZE);
                 Vector3 center = size / 2;
 				Gizmos.DrawWireCube(center, size);
 
-                Vector3 csize = new Vector3(Utils.GRASS_TILE_CELL_SIZE, 1.5f, Utils.GRASS_TILE_CELL_SIZE);
-                for (int i = 0; i < Utils.GRASS_TILE_CELL_DIM; i++)
+                Vector3 csize = new Vector3(TerrainUtils.GRASS_TILE_CELL_SIZE, 1.5f, TerrainUtils.GRASS_TILE_CELL_SIZE);
+                for (int i = 0; i < TerrainUtils.GRASS_TILE_CELL_DIM; i++)
 				{
-                    for (int j = 0; j < Utils.GRASS_TILE_CELL_DIM; j++)
+                    for (int j = 0; j < TerrainUtils.GRASS_TILE_CELL_DIM; j++)
 					{
 						GrassTileCell cell = cellMap[i, j];
 						
 						if (cell != null)
 						{
-                            Vector3 ccenter = new Vector3(i * Utils.GRASS_TILE_CELL_SIZE, 0, j * Utils.GRASS_TILE_CELL_SIZE) + csize / 2;
+                            Vector3 ccenter = new Vector3(i * TerrainUtils.GRASS_TILE_CELL_SIZE, 0, j * TerrainUtils.GRASS_TILE_CELL_SIZE) + csize / 2;
 							Gizmos.DrawWireCube(ccenter, csize);
 						}
 					}

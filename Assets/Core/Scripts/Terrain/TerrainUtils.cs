@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace Terrain
+namespace Core
 {
-	public static class Utils
+	public static class TerrainUtils
 	{
 		public const float TERRAIN_TILE_SIZE = 16f;
 		public const float TERRAIN_TILE_HALF_SIZE = TERRAIN_TILE_SIZE / 2f;

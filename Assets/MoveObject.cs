@@ -15,13 +15,13 @@ public class MoveObject : MonoBehaviour
 
 	void Update () 
 	{
-		if (Terrain.Grass.Inst != null) 
+		if (Core.Grass.Inst != null) 
 		{
             Vector3 curPos = transform.position;
 
             if ((lastPos - curPos).magnitude > 0.5f)
             {
-                Terrain.Grass.Inst.AddTurbulence(curPos, radius, strength);
+                Core.Grass.Inst.AddTurbulence(curPos, radius, strength);
                 lastPos = curPos;
             }
 		}

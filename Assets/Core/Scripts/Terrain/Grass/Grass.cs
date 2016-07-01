@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Terrain
+namespace Core
 {
 	public class Grass : MonoBehaviour 
 	{
@@ -130,11 +130,11 @@ namespace Terrain
 
 			for (int i = 0; i < d.textureIndeics.Length; i++)
 			{
-				for (int l = 0; l < Utils.GRASS_TILE_CELL_DIM; l++)
+				for (int l = 0; l < TerrainUtils.GRASS_TILE_CELL_DIM; l++)
 				{
-					for (int m = 0; m < Utils.GRASS_TILE_CELL_DIM; m++)
+					for (int m = 0; m < TerrainUtils.GRASS_TILE_CELL_DIM; m++)
 					{
-						int idx = l * Utils.GRASS_TILE_CELL_DIM + m;
+						int idx = l * TerrainUtils.GRASS_TILE_CELL_DIM + m;
 						
 						int texPos = d.texture[idx];
 						if (texPos != i || d.size[idx] <= 0) continue;
@@ -153,12 +153,12 @@ namespace Terrain
 			Random.seed = d.seed;
 
             Vector3 tilePos = new Vector3();
-            tilePos.x = (float)d.posX * Utils.TERRAIN_TILE_SIZE;
-            tilePos.z = (float)d.posZ * Utils.TERRAIN_TILE_SIZE;
-            tilePos.y = Utils.GetTerrainHeight(tilePos.x + Utils.TERRAIN_TILE_HALF_SIZE, tilePos.z + Utils.TERRAIN_TILE_HALF_SIZE);
+            tilePos.x = (float)d.posX * TerrainUtils.TERRAIN_TILE_SIZE;
+            tilePos.z = (float)d.posZ * TerrainUtils.TERRAIN_TILE_SIZE;
+            tilePos.y = TerrainUtils.GetTerrainHeight(tilePos.x + TerrainUtils.TERRAIN_TILE_HALF_SIZE, tilePos.z + TerrainUtils.TERRAIN_TILE_HALF_SIZE);
 
 			List<GrassTileCell> cellList = new List<GrassTileCell>();
-			GrassTileCell[,] cellMap = new GrassTileCell[Utils.GRASS_TILE_CELL_DIM, Utils.GRASS_TILE_CELL_DIM];
+			GrassTileCell[,] cellMap = new GrassTileCell[TerrainUtils.GRASS_TILE_CELL_DIM, TerrainUtils.GRASS_TILE_CELL_DIM];
 
 			Vector3[] vertices = new Vector3[grassCount * 4];
 			Color32[] colors = new Color32[grassCount * 4];
@@ -178,11 +178,11 @@ namespace Terrain
 				float aspect = 1f;
 				GetTexture(texIndex, ref tex, ref rect, ref aspect);
 
-				for (int l = 0; l < Utils.GRASS_TILE_CELL_DIM; l++)
+				for (int l = 0; l < TerrainUtils.GRASS_TILE_CELL_DIM; l++)
 				{
-					for (int m = 0; m < Utils.GRASS_TILE_CELL_DIM; m++)
+					for (int m = 0; m < TerrainUtils.GRASS_TILE_CELL_DIM; m++)
 					{
-						int idx = l * Utils.GRASS_TILE_CELL_DIM + m;
+						int idx = l * TerrainUtils.GRASS_TILE_CELL_DIM + m;
 
 						int texPos = d.texture[idx];
 						int size = d.size[idx];
@@ -190,9 +190,9 @@ namespace Terrain
 						if (texPos != i || d.size[idx] <= 0) continue;
 						if (grassCounter++ % grassSkip != 0) continue;
 
-						float gx = (float)m * Utils.GRASS_TILE_CELL_SIZE + Random.Range(0f, 0.26f);
-						float gz = (float)l * Utils.GRASS_TILE_CELL_SIZE + Random.Range(0f, 0.26f);
-                        float gy = Utils.GetTerrainHeight(gx + tilePos.x, gz + tilePos.z) - tilePos.y;
+						float gx = (float)m * TerrainUtils.GRASS_TILE_CELL_SIZE + Random.Range(0f, 0.26f);
+						float gz = (float)l * TerrainUtils.GRASS_TILE_CELL_SIZE + Random.Range(0f, 0.26f);
+                        float gy = TerrainUtils.GetTerrainHeight(gx + tilePos.x, gz + tilePos.z) - tilePos.y;
 						int rotation = Random.Range(0, 63);
 						int waveSpeed = Random.Range(0, 255);
 
