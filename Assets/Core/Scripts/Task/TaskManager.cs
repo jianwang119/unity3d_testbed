@@ -21,7 +21,7 @@ namespace Core
                 Enumerator = e;
             }
 
-            public override bool Finish()
+            public override bool IsFinish()
             {
                 return IsDone;
             }
@@ -40,7 +40,7 @@ namespace Core
             {
                 try
                 {
-                    if (e.Current == null || e.Current.Finish())
+                    if (e.Current == null || e.Current.IsFinish())
                     {
                         if (!e.MoveNext())
                         {
