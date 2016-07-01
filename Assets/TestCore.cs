@@ -4,15 +4,22 @@ using System.Collections.Generic;
 
 public class TestCore: MonoBehaviour 
 {
+    Core.Task task;
     void OnGUI()
     {
         if (GUI.Button(new Rect(0, 0, 100, 100), "test"))
         {
-            TestTask();
+            if (task != null)
+            {
+                task.IsCancelled = true;
+            }
+            task = TestTask();
         }
     }
     IEnumerator<Core.WaitFor> Test()
     {
+        Core.Logger.Log("==============================");
+
         Core.Logger.Log("wait for next update 0");
         yield return new Core.WaitForNextUpdate();
         Core.Logger.Log("wait for next update 1");
@@ -21,8 +28,9 @@ public class TestCore: MonoBehaviour
         yield return new Core.WaitForSeconds(3);
         Core.Logger.Log("wait for seconds 1");
 
-        Core.Logger.Log("add TestInTest task");
+        Core.Logger.Log("---- add TestInTest task");
         yield return Core.TaskManager.Inst.StartTask(TestInTest());
+        Core.Logger.Log("---- end TestInTest task");
 
         int id = 0;
         while(true)
@@ -33,6 +41,8 @@ public class TestCore: MonoBehaviour
             if (id > 10)
                 break;
         }
+
+        Core.Logger.Log("==============================");
     }
 
     IEnumerator<Core.WaitFor> TestInTest()
@@ -43,7 +53,6 @@ public class TestCore: MonoBehaviour
     }
     Core.Task TestTask()
     {
-        Core.Logger.Log("add test task");
         return Core.TaskManager.Inst.StartTask(Test());
     }
 }
