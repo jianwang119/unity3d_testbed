@@ -10,27 +10,10 @@ namespace Core
 
         public static TaskManager Inst { get { return _Inst; } }
 
-        private class TaskInternal : Task
-        {
-            public IEnumerator<WaitFor> Enumerator { get; set; }
+        private List<Task> taskListFront = new List<Task>();
+        private List<Task> taskListBack = new List<Task>();
 
-            public bool IsDone { get; set; }
-
-            public TaskInternal(IEnumerator<WaitFor> e)
-            {
-                Enumerator = e;
-            }
-
-            public override bool IsFinish()
-            {
-                return IsDone;
-            }
-        }
-
-        private List<TaskInternal> taskListFront = new List<TaskInternal>();
-        private List<TaskInternal> taskListBack = new List<TaskInternal>();
-
-        private bool DoTask(TaskInternal task)
+        private bool DoTask(Task task)
         {
             IEnumerator<WaitFor> e = task.Enumerator;
 
@@ -59,14 +42,14 @@ namespace Core
 
         public Task StartTask(IEnumerator<WaitFor> e)
         {
-            TaskInternal task = new TaskInternal(e);
+            Task task = new Task(e);
             taskListFront.Add(task);
             return task;
         }
 
         public void CancelTask(Task task)
         {
-            TaskInternal t = task as TaskInternal;
+            Task t = task as Task;
             if (t != null && !t.IsDone)
             {
                 t.IsCancelled = true;
@@ -76,13 +59,13 @@ namespace Core
 
         public void OnUpdate(float deltaTime)
 		{
-            List<TaskInternal> taskListTmp = taskListFront;
+            List<Task> taskListTmp = taskListFront;
             taskListFront = taskListBack;
             taskListBack = taskListTmp;
 
             for (int i = 0; i < taskListTmp.Count; i++)
 			{
-                TaskInternal task = taskListTmp[i];
+                Task task = taskListTmp[i];
 
 				if (!task.IsCancelled)
 				{
