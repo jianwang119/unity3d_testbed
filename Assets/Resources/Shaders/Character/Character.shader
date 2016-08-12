@@ -32,7 +32,7 @@ Shader "Custom/Character"
 
 		void surf (Input IN, inout SurfaceOutputStandard o) 
 		{
-			fixed4 c  = _Color * tex2D(_MainTex, IN.uv_MainTex);
+			fixed4 c = _Color * tex2D(_MainTex, IN.uv_MainTex);
 			fixed4 m = 0;
 			//m = tex2D(_MetallicMap, uv);
 			m.r = _Metallic;
