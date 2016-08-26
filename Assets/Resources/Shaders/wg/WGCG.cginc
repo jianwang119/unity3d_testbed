@@ -18,6 +18,23 @@ float4 CustomLightingLambert (SurfaceOutput s, float3 lightDir, float atten)
 	return c;
 }
 
+/*****************************************************************************************************
+ * Function : BlinnPhong 
+ *****************************************************************************************************/
+float4 CustomLightingBlinnPhong (SurfaceOutput s, float3 lightDir, float3 viewDir, float atten)
+{
+	half3 h = normalize (lightDir + viewDir);
+	
+	fixed diff = max (0, dot (s.Normal, lightDir));
+	
+	float nh = max (0, dot (s.Normal, h));
+	float spec = pow (nh, s.Specular*128.0) * s.Gloss;
+	
+	fixed4 c;
+	c.rgb = (s.Albedo * _LightColor0.rgb * diff + _LightColor0.rgb * _SpecColor.rgb * spec) * (atten * 2);
+	c.a = s.Alpha + _LightColor0.a * _SpecColor.a * spec * atten;
+	return c;
+}
 
 // ------------------------------------------------------------------
 //  Fog helpers
