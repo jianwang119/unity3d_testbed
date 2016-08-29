@@ -42,6 +42,8 @@ Shader "Custom/CharacterWithRimLight"
 			o.Albedo = c.rgb + _ShineValue;
 			o.Metallic = m.r;
 			o.Smoothness = m.a;
+
+
 			o.Alpha = c.a;
 
 			half rim = 1.0 - saturate(dot(normalize(IN.viewDir), o.Normal));
