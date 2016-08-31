@@ -84,7 +84,7 @@ Shader "WG/Bumped Specular"
 			#ifndef LIGHTMAP_OFF
 				struct v2f_surf {
 				  float4 pos : SV_POSITION;
-				  float2 pack0 : TEXCOORD0;
+				  float4 pack0 : TEXCOORD0;
 				  float2 lmap : TEXCOORD1;
 				  CUSTOM_UNITY_FOG_COORDS(2)
 				  LIGHTING_COORDS(3,4)
