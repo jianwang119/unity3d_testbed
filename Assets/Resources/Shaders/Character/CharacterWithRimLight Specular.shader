@@ -14,7 +14,7 @@ Shader "Custom/CharacterWithRimLight Specular"
 		_RimPower("Rim Power", Range(0.5,8.0)) = 3.0
 	}
 	SubShader {
-		Tags { "RenderType"="Opaque" "Queue" = "Transparent-1" }
+		Tags { "RenderType"="Opaque" "Queue" = "Geometry+500" }
 		LOD 200
 		
 		CGPROGRAM
