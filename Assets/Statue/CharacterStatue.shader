@@ -51,7 +51,7 @@ Shader "Custom/CharacterStatue"
 			m.r = _Metallic;
 			m.a = _Glossiness;
 
-			o.Albedo = (greyTex * _MainTexMul + ref * _EnvTexMul)* _Color;
+			o.Albedo = (greyTex * _MainTexMul + ref * _EnvTexMul * tex.a)* _Color;
 			o.Metallic = m.r;
 			o.Smoothness = m.a;
 			o.Alpha = tex.a;
