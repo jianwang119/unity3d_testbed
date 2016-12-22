@@ -21,7 +21,7 @@ Shader "Custom/CharacterCombineRimLight"
 	}
 	SubShader 
 	{
-		Tags { "RenderType"="Opaque" "Queue" = "Transparent-2" }
+		Tags { "RenderType"="Opaque" "Queue" = "Geometry+500" }
 		LOD 200
 		
 		CGPROGRAM

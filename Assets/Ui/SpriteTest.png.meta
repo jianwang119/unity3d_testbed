@@ -1,17 +1,17 @@
 fileFormatVersion: 2
-guid: a62fc4a66f9d2c54e81ccddf12d028d2
-timeCreated: 1482372534
+guid: 41a42556c5748ec4e9e141c4167e172e
+timeCreated: 1482375936
 licenseType: Pro
 TextureImporter:
   fileIDToRecycleName:
-    21300000: challenger_albedo_1_0
-    21300002: challenger_albedo_1_1
-    21300004: challenger_albedo_1_2
-    21300006: challenger_albedo_1_3
+    21300000: SpriteTest_0
+    21300002: SpriteTest_1
+    21300004: SpriteTest_2
+    21300006: SpriteTest_3
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     linearTexture: 0
     correctGamma: 0
     fadeOut: 0
@@ -27,82 +27,82 @@ TextureImporter:
   grayScaleToAlpha: 0
   generateCubemap: 0
   cubemapConvolution: 0
-  cubemapConvolutionSteps: 8
+  cubemapConvolutionSteps: 7
   cubemapConvolutionExponent: 1.5
   seamlessCubemap: 0
   textureFormat: -1
-  maxTextureSize: 4096
+  maxTextureSize: 2048
   textureSettings:
     filterMode: -1
-    aniso: 16
+    aniso: -1
     mipBias: -1
     wrapMode: 1
-  nPOTScale: 1
+  nPOTScale: 0
   lightmap: 0
   rGBM: 0
   compressionQuality: 50
   allowsAlphaSplitting: 0
-  spriteMode: 0
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 100
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationDetail: -1
-  textureType: 0
+  textureType: 8
   buildTargetSettings: []
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: challenger_albedo_1_0
+      name: SpriteTest_0
       rect:
         serializedVersion: 2
-        x: 57
-        y: 738
-        width: 298
-        height: 228
+        x: 14
+        y: 96
+        width: 38
+        height: 31
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: challenger_albedo_1_1
+      name: SpriteTest_1
       rect:
         serializedVersion: 2
-        x: 445
-        y: 704
-        width: 358
-        height: 252
+        x: 58
+        y: 51
+        width: 54
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: challenger_albedo_1_2
+      name: SpriteTest_2
       rect:
         serializedVersion: 2
-        x: 235
-        y: 428
-        width: 319
-        height: 178
+        x: 34
+        y: 7
+        width: 40
+        height: 33
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: challenger_albedo_1_3
+      name: SpriteTest_3
       rect:
         serializedVersion: 2
-        x: 325
-        y: 222
-        width: 302
-        height: 111
+        x: 0
+        y: 34
+        width: 32
+        height: 25
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
